@@ -1,0 +1,296 @@
+[
+  {
+    "name": "products",
+    "type": "collection",
+    "options": {
+      "validator": {
+        "$jsonSchema": {
+          "bsonType": "object",
+          "required": [
+            "_id",
+            "name",
+            "description",
+            "originalPrice"
+          ],
+          "properties": {
+            "_id": {
+              "bsonType": "int"
+            },
+            "name": {
+              "bsonType": "string"
+            },
+            "description": {
+              "bsonType": "string"
+            },
+            "originalPrice": {
+              "bsonType": [
+                "int",
+                "long",
+                "double"
+              ]
+            },
+            "discountRate": {
+              "bsonType": [
+                "double",
+                "int"
+              ]
+            },
+            "createdAt": {
+              "bsonType": "date"
+            },
+            "images": {
+              "bsonType": "array",
+              "items": {
+                "bsonType": "object",
+                "required": [
+                  "url"
+                ],
+                "properties": {
+                  "url": {
+                    "bsonType": "string"
+                  },
+                  "isThumbnail": {
+                    "bsonType": "bool"
+                  }
+                }
+              }
+            },
+            "categories": {
+              "bsonType": "array",
+              "items": {
+                "bsonType": "string"
+              }
+            },
+            "availableSizes": {
+              "bsonType": "array",
+              "items": {
+                "bsonType": "string"
+              }
+            },
+            "reviews": {
+              "bsonType": "array",
+              "items": {
+                "bsonType": "object",
+                "required": [
+                  "userId",
+                  "displayName",
+                  "rating"
+                ],
+                "properties": {
+                  "userId": {
+                    "bsonType": "int"
+                  },
+                  "displayName": {
+                    "bsonType": "string"
+                  },
+                  "rating": {
+                    "bsonType": [
+                      "int",
+                      "double"
+                    ]
+                  },
+                  "comment": {
+                    "bsonType": "string"
+                  },
+                  "createdAt": {
+                    "bsonType": "date"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "info": {
+      "readOnly": false,
+      "uuid": {
+        "$uuid": "6f0597a3-ee8d-4394-b79d-4d5250394eca"
+      }
+    },
+    "idIndex": {
+      "v": 2,
+      "key": {
+        "_id": 1
+      },
+      "name": "_id_"
+    }
+  },
+  {
+    "name": "users",
+    "type": "collection",
+    "options": {
+      "validator": {
+        "$jsonSchema": {
+          "bsonType": "object",
+          "required": [
+            "_id",
+            "loginName",
+            "password",
+            "displayName"
+          ],
+          "properties": {
+            "_id": {
+              "bsonType": "int"
+            },
+            "loginName": {
+              "bsonType": "string"
+            },
+            "password": {
+              "bsonType": "string"
+            },
+            "displayName": {
+              "bsonType": "string"
+            },
+            "role": {
+              "enum": [
+                "customer",
+                "admin"
+              ]
+            },
+            "createdAt": {
+              "bsonType": "date"
+            },
+            "cart": {
+              "bsonType": "array",
+              "items": {
+                "bsonType": "object",
+                "required": [
+                  "productId",
+                  "size",
+                  "quantity"
+                ],
+                "properties": {
+                  "productId": {
+                    "bsonType": "int"
+                  },
+                  "size": {
+                    "bsonType": "string"
+                  },
+                  "quantity": {
+                    "bsonType": "int",
+                    "minimum": 1
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "info": {
+      "readOnly": false,
+      "uuid": {
+        "$uuid": "93a508e6-8ca9-4fab-a1fc-e78c013eb5b1"
+      }
+    },
+    "idIndex": {
+      "v": 2,
+      "key": {
+        "_id": 1
+      },
+      "name": "_id_"
+    }
+  },
+  {
+    "name": "counters",
+    "type": "collection",
+    "options": {},
+    "info": {
+      "readOnly": false,
+      "uuid": {
+        "$uuid": "a667e7a7-7df6-4848-a456-c65cd66ea6e8"
+      }
+    },
+    "idIndex": {
+      "v": 2,
+      "key": {
+        "_id": 1
+      },
+      "name": "_id_"
+    }
+  },
+  {
+    "name": "orders",
+    "type": "collection",
+    "options": {
+      "validator": {
+        "$jsonSchema": {
+          "bsonType": "object",
+          "required": [
+            "_id",
+            "userId",
+            "items",
+            "totalPrice"
+          ],
+          "properties": {
+            "_id": {
+              "bsonType": "int"
+            },
+            "userId": {
+              "bsonType": "int"
+            },
+            "totalPrice": {
+              "bsonType": [
+                "int",
+                "double",
+                "long"
+              ]
+            },
+            "createdAt": {
+              "bsonType": "date"
+            },
+            "items": {
+              "bsonType": "array",
+              "minItems": 1,
+              "items": {
+                "bsonType": "object",
+                "required": [
+                  "productId",
+                  "productName",
+                  "size",
+                  "quantity",
+                  "priceAtPurchase"
+                ],
+                "properties": {
+                  "productId": {
+                    "bsonType": "int"
+                  },
+                  "productName": {
+                    "bsonType": "string"
+                  },
+                  "size": {
+                    "bsonType": "string"
+                  },
+                  "quantity": {
+                    "bsonType": "int"
+                  },
+                  "priceAtPurchase": {
+                    "bsonType": [
+                      "int",
+                      "double",
+                      "long"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "info": {
+      "readOnly": false,
+      "uuid": {
+        "$uuid": "aee3c44a-b215-434c-90ee-7f6dc88fba60"
+      }
+    },
+    "idIndex": {
+      "v": 2,
+      "key": {
+        "_id": 1
+      },
+      "name": "_id_"
+    }
+  }
+]
