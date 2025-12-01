@@ -8,6 +8,7 @@ import { HomePage } from "@/pages/HomePage";
 import { MensCollection } from "@/pages/MensCollection";
 import { ProductDetail } from "@/pages/ProductDetail";
 import { CartProvider } from "@/context/CartContext";
+import { AuthProvider } from "@/context/AuthContext";
 import styled from "styled-components";
 
 const AppContainer = styled.div`
@@ -35,27 +36,29 @@ const HiddenList = styled.ul`
 
 export const App = () => {
   return (
-    <CartProvider>
-      <BrowserRouter>
-        <AppContainer>
-          <AnnouncementBanner />
-          <Header />
-          <CartDrawer />
-          <MainContent>
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/collections/mens-off" element={<MensCollection />} />
-              <Route path="/products/:productId" element={<ProductDetail />} />
-            </Routes>
-          </MainContent>
-          <Footer />
-          <HiddenList>
-            <li>Choosing a selection results in a full page refresh.</li>
-            <li>Opens in a new window.</li>
-          </HiddenList>
-          <FloatingButton />
-        </AppContainer>
-      </BrowserRouter>
-    </CartProvider>
+    <AuthProvider>
+      <CartProvider>
+        <BrowserRouter>
+          <AppContainer>
+            <AnnouncementBanner />
+            <Header />
+            <CartDrawer />
+            <MainContent>
+              <Routes>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/collections/mens-off" element={<MensCollection />} />
+                <Route path="/products/:productId" element={<ProductDetail />} />
+              </Routes>
+            </MainContent>
+            <Footer />
+            <HiddenList>
+              <li>Choosing a selection results in a full page refresh.</li>
+              <li>Opens in a new window.</li>
+            </HiddenList>
+            <FloatingButton />
+          </AppContainer>
+        </BrowserRouter>
+      </CartProvider>
+    </AuthProvider>
   );
 };

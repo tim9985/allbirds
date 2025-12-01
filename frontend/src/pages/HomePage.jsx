@@ -2,7 +2,7 @@ import styled from "styled-components";
 import { Hero } from "@/sections/Hero";
 import { TrendingSection } from "@/sections/TrendingSection";
 import { MaterialsSection } from "@/sections/MaterialsSection";
-import { NewsletterSection } from "@/sections/NewsletterSection";
+import { NewsLetterSection } from "@/sections/NewsLetterSection";
 
 const MainContent = styled.main`
   position: relative;
@@ -20,7 +20,7 @@ export const HomePage = () => {
       <TrendingSection />
       <Spacer />
       <MaterialsSection />
-      <NewsletterSection />
+      <NewsLetterSection />
     </MainContent>
   );
 };

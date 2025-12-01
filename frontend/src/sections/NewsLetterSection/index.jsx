@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { NewsletterForm } from "@/sections/NewsletterSection/components/NewsletterForm";
+import { NewsletterForm } from "@/sections/NewsLetterSection/components/NewsletterForm";
 
 const Container = styled.div`
   box-sizing: border-box;
@@ -117,7 +117,7 @@ const DisclaimerLink = styled.a`
   }
 `;
 
-export const NewsletterSection = () => {
+export const NewsLetterSection = () => {
   return (
     <Container>
       <InnerWrapper>
