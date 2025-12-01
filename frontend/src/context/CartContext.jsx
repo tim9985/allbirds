@@ -11,6 +11,19 @@ export const useCart = () => {
   return context;
 };
 
+// 백엔드 장바구니 데이터를 프론트엔드 형식으로 변환
+const transformBackendCartData = (backendCart) => {
+  return backendCart.map(item => ({
+    _id: item.productId?._id || item.productId,
+    name: item.productId?.name || '',
+    originalPrice: item.productId?.originalPrice || 0,
+    discountRate: item.productId?.discountRate || 0,
+    selectedSize: item.size,
+    quantity: item.quantity,
+    imageUrl: item.productId?.images?.[0]?.url || '/img/default-product.png',
+  }));
+};
+
 export const CartProvider = ({ children }) => {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [cartItems, setCartItems] = useState([]);
@@ -24,16 +37,7 @@ export const CartProvider = ({ children }) => {
     try {
       const result = await cartApi.getCart();
       if (result.cart) {
-        // 백엔드 데이터를 프론트엔드 형식으로 변환
-        const items = result.cart.map(item => ({
-          _id: item.productId?._id || item.productId,
-          name: item.productId?.name || '',
-          originalPrice: item.productId?.originalPrice || 0,
-          discountRate: item.productId?.discountRate || 0,
-          selectedSize: item.size,
-          quantity: item.quantity,
-          imageUrl: item.productId?.images?.[0]?.url || '/img/default-product.png',
-        }));
+        const items = transformBackendCartData(result.cart);
         setCartItems(items);
         setIsLoggedIn(true);
       }
