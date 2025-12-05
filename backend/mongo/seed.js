@@ -18,6 +18,16 @@ function getRandomSizes() {
   return shuffled.slice(0, count).sort((a, b) => a - b);
 }
 
+// 사이즈별 랜덤 재고 생성 함수
+function generateStock(sizes) {
+  const stock = {};
+  for (const size of sizes) {
+    // 각 사이즈별 0~20개 재고 (0이면 품절)
+    stock[String(size)] = Math.floor(Math.random() * 21);
+  }
+  return stock;
+}
+
 // 상품 목록
 const productsData = [
   // Tree + Lifestyle
@@ -182,6 +192,9 @@ async function initDatabase() {
     console.log("\n상품 데이터 삽입 중...");
     const insertedProducts = [];
     for (const productData of productsData) {
+      const sizes = productData.sizes;
+      const stock = generateStock(sizes); // 사이즈별 재고 생성
+      
       const product = new Product({
         name: productData.name,
         description: productData.description,
@@ -189,7 +202,8 @@ async function initDatabase() {
         discountRate: productData.discountRate,
         materials: productData.materials,
         categories: productData.categories,
-        sizes: productData.sizes,
+        sizes: sizes,
+        stock: stock, // 재고 추가
         images: productData.images,
         soldCount: Math.floor(Math.random() * 500), // 랜덤 판매량
         reviewCount: 0,
@@ -199,7 +213,7 @@ async function initDatabase() {
       
       const saved = await product.save();
       insertedProducts.push(saved);
-      console.log(`  - ${saved.name} (ID: ${saved._id})`);
+      console.log(`  - ${saved.name} (ID: ${saved._id}), 재고: ${JSON.stringify(stock)}`);
     }
     console.log(`✅ ${insertedProducts.length}개 상품 삽입 완료`);
 

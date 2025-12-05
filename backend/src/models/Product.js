@@ -117,6 +117,13 @@ const ProductSchema = new Schema({
   // 사이즈
   sizes: [Number],  // 예: [240, 245, 250]
 
+  // 사이즈별 재고 (예: { "240": 10, "245": 5, "250": 0 })
+  stock: {
+    type: Map,
+    of: Number,
+    default: {},
+  },
+
   // 소재
   materials: [String],  // 예: ["가볍고 시원한 tree", "면"]
   

@@ -1,6 +1,10 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { CartEmpty } from "@/components/CartDrawer/components/CartEmpty";
 import { useCart } from "@/context/CartContext";
+import { useAuth } from "@/context/AuthContext";
+import { createOrder } from "@/api/userAPI";
 
 const DrawerContainer = styled.div`
   position: fixed;
@@ -444,7 +448,55 @@ const RemoveButton = styled.button`
 `;
 
 export const CartDrawerContent = () => {
-  const { isCartOpen, closeCart, cartItems, getTotalPrice, getTotalItems, updateQuantity, removeFromCart } = useCart();
+  const navigate = useNavigate();
+  const { isCartOpen, closeCart, cartItems, getTotalPrice, getTotalItems, updateQuantity, removeFromCart, clearCart } = useCart();
+  const { isLoggedIn } = useAuth();
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const handleCheckout = async (e) => {
+    e.preventDefault();
+    
+    // 로그인 체크
+    if (!isLoggedIn) {
+      closeCart();
+      navigate("/account/login");
+      return;
+    }
+
+    if (cartItems.length === 0) {
+      alert("장바구니가 비어 있습니다.");
+      return;
+    }
+
+    setIsProcessing(true);
+    try {
+      // 장바구니 데이터를 API로 전달
+      const orderItems = cartItems.map(item => ({
+        productId: item._id,
+        size: item.selectedSize,
+        quantity: item.quantity
+      }));
+      await createOrder(orderItems);
+      clearCart();
+      closeCart();
+      // PRG 패턴: 결제 완료 후 마이페이지 주문 내역으로 리다이렉트
+      navigate("/mypage/orders", { replace: true });
+    } catch (err) {
+      // 재고 부족 에러 처리
+      if (err.response?.data?.errors) {
+        const stockErrors = err.response.data.errors;
+        const errorMessages = stockErrors.map(e => 
+          `${e.productName} (${e.size}) - 요청: ${e.requested}개, 재고: ${e.available}개`
+        ).join('\n');
+        alert(`재고 부족:\n${errorMessages}`);
+      } else {
+        const message = err.response?.data?.message || "주문 처리 중 오류가 발생했습니다.";
+        alert(message);
+      }
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
   return (
     <DrawerContainer $isOpen={isCartOpen}>
@@ -504,7 +556,13 @@ export const CartDrawerContent = () => {
                   <TotalText>₩{Math.round(getTotalPrice()).toLocaleString()}</TotalText>
                 </TotalRow>
                 <ButtonWrapper>
-                  <CheckoutButton href="/checkout">결제</CheckoutButton>
+                  <CheckoutButton 
+                    as="button" 
+                    onClick={handleCheckout}
+                    disabled={isProcessing}
+                  >
+                    {isProcessing ? "처리 중..." : "결제"}
+                  </CheckoutButton>
                 </ButtonWrapper>
               </CheckoutInner>
             </CheckoutSection>

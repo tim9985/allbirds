@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import { Link } from "react-router-dom";
 
 const LogoWrapper = styled.div`
   position: absolute;
@@ -42,11 +43,12 @@ const LogoHeading = styled.h1`
   }
 `;
 
-const LogoLink = styled.a`
+const LogoLink = styled(Link)`
   align-items: center;
   box-sizing: border-box;
   caret-color: transparent;
   display: flex;
+  text-decoration: none;
 `;
 
 const LogoImage = styled.img`
@@ -65,8 +67,8 @@ export const Logo = () => {
   return (
     <LogoWrapper>
       <LogoHeading>
-        <LogoLink href="https://allbirds.co.kr/">
-          <LogoImage src="/img/icon-1.svg" alt="Icon" />
+        <LogoLink to="/">
+          <LogoImage src="/img/icon-1.svg" alt="Allbirds" />
         </LogoLink>
       </LogoHeading>
     </LogoWrapper>

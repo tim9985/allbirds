@@ -100,7 +100,7 @@ export const DesktopNav = () => {
       <NavMenu />
       <MobileActions>
         <ActionButton href="/pages/consent">가입</ActionButton>
-        <ActionButton href="https://allbirds.co.kr/account/login">로그인</ActionButton>
+        <ActionButton href="/account/login">로그인</ActionButton>
       </MobileActions>
     </Nav>
   );

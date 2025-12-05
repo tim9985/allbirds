@@ -552,11 +552,31 @@ export const ProductDetail = () => {
   const discountedPrice = product.originalPrice * (1 - product.discountRate);
 
   // 사이즈 데이터
-  const allSizes = [230, 235, 240, 245, 250, 255, 260, 265, 270, 275, 280, 285, 290, 295, 300, 305, 310, 315, 320];
+  const allSizes = [250, 255, 260, 265, 270, 275, 280, 285, 290, 295, 300, 305, 310, 315, 320];
   const availableSizes = product.sizes || [];
+  
+  // 재고 데이터 (사이즈별 재고)
+  const stockMap = product.stock || {};
+  
+  // 사이즈별 재고 확인 함수
+  const getStock = (size) => {
+    return stockMap[String(size)] ?? 0;
+  };
+  
+  // 사이즈가 구매 가능한지 (재고 > 0)
+  const isSizeAvailable = (size) => {
+    return availableSizes.includes(size) && getStock(size) > 0;
+  };
 
   const handleAddToCart = () => {
     if (!selectedSize) return;
+    
+    // 선택한 사이즈의 재고 확인
+    const currentStock = getStock(selectedSize);
+    if (currentStock <= 0) {
+      alert('선택하신 사이즈는 품절입니다.');
+      return;
+    }
 
     const productImages = product.images || [];
     const mainImage = productImages[selectedColor] || productImages[0];
@@ -568,6 +588,7 @@ export const ProductDetail = () => {
       discountRate: product.discountRate,
       selectedSize: selectedSize,
       imageUrl: mainImage?.url || '/img/default-product.png',
+      stock: currentStock, // 현재 재고 정보 전달
     });
   };
 
@@ -742,16 +763,21 @@ export const ProductDetail = () => {
               <span>사이즈</span>
             </SelectorLabel>
             <SizeOptions>
-              {allSizes.map((size) => (
-                <SizeOption
-                  key={size}
-                  $selected={selectedSize === size}
-                  onClick={() => availableSizes.includes(size) && setSelectedSize(size)}
-                  disabled={!availableSizes.includes(size)}
-                >
-                  {size}
-                </SizeOption>
-              ))}
+              {allSizes.map((size) => {
+                const stock = getStock(size);
+                const isAvailable = isSizeAvailable(size);
+                return (
+                  <SizeOption
+                    key={size}
+                    $selected={selectedSize === size}
+                    onClick={() => isAvailable && setSelectedSize(size)}
+                    disabled={!isAvailable}
+                    title={isAvailable ? `재고: ${stock}개` : '품절'}
+                  >
+                    {size}
+                  </SizeOption>
+                );
+              })}
             </SizeOptions>
           </SizeSelector>
 

@@ -20,7 +20,7 @@ function calcCurrentPrice(product) {
 }
 
 // 주문 생성: POST /api/orders
-// 장바구니 -> 주문 생성
+// 프론트엔드 장바구니 데이터로 주문 생성
 export async function createOrder(req, res, next) {
   try {
     const userId = req.session.userId;
@@ -28,18 +28,14 @@ export async function createOrder(req, res, next) {
       return res.status(401).json({ message: "로그인이 필요합니다." });
     }
 
-    // 유저 + 장바구니 가져오기
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ message: "사용자를 찾을 수 없습니다." });
-    }
-
-    const cart = user.cart || [];
-    if (cart.length === 0) {
+    // 프론트엔드에서 보낸 장바구니 아이템
+    const { cartItems } = req.body;
+    
+    if (!cartItems || cartItems.length === 0) {
       return res.status(400).json({ message: "장바구니가 비어 있습니다." });
     }
 
-    const productIds = cart.map((ci) => ci.productId);
+    const productIds = cartItems.map((ci) => ci.productId);
     const products = await Product.find({ _id: { $in: productIds } });
 
     // productId → product 매핑
@@ -48,19 +44,45 @@ export async function createOrder(req, res, next) {
       productMap.set(p._id, p);
     }
 
-    const orderItems = [];
-    let totalPrice = 0;
-
-    for (const item of cart) {
+    // 1단계: 재고 검증
+    const stockErrors = [];
+    for (const item of cartItems) {
       const p = productMap.get(item.productId);
       if (!p) {
-        // 상품이 삭제되었거나 없으면 스킵하거나 에러 처리
         return res.status(400).json({
           message: `상품(ID: ${item.productId})을 찾을 수 없습니다.`,
         });
       }
 
-      const unitPrice = calcCurrentPrice(p); // 현재 가격(할인 반영)
+      const sizeKey = String(item.size);
+      const currentStock = p.stock?.get(sizeKey) ?? 0;
+      
+      if (currentStock < item.quantity) {
+        stockErrors.push({
+          productId: p._id,
+          productName: p.name,
+          size: item.size,
+          requested: item.quantity,
+          available: currentStock,
+        });
+      }
+    }
+
+    // 재고 부족 시 에러 반환
+    if (stockErrors.length > 0) {
+      return res.status(400).json({
+        message: "재고가 부족한 상품이 있습니다.",
+        errors: stockErrors,
+      });
+    }
+
+    // 2단계: 주문 아이템 생성 및 가격 계산
+    const orderItems = [];
+    let totalPrice = 0;
+
+    for (const item of cartItems) {
+      const p = productMap.get(item.productId);
+      const unitPrice = calcCurrentPrice(p);
       const lineTotal = unitPrice * item.quantity;
 
       orderItems.push({
@@ -74,7 +96,7 @@ export async function createOrder(req, res, next) {
       totalPrice += lineTotal;
     }
 
-    // 주문 문서 생성
+    // 3단계: 주문 문서 생성
     const order = new Order({
       userId,
       totalPrice,
@@ -83,20 +105,19 @@ export async function createOrder(req, res, next) {
 
     const saved = await order.save();
 
-    // 상품 판매량(soldCount) 업데이트
-    const bulkOps = cart.map((item) => ({
-      updateOne: {
-        filter: { _id: item.productId },
-        update: { $inc: { soldCount: item.quantity } },
-      },
-    }));
-    if (bulkOps.length > 0) {
-      await Product.bulkWrite(bulkOps);
+    // 4단계: 재고 차감 및 판매량 증가
+    for (const item of cartItems) {
+      const sizeKey = String(item.size);
+      await Product.updateOne(
+        { _id: item.productId },
+        {
+          $inc: {
+            soldCount: item.quantity,
+            [`stock.${sizeKey}`]: -item.quantity,
+          },
+        }
+      );
     }
-
-    // 장바구니 비우기
-    user.cart = [];
-    await user.save();
 
     res.status(201).json({
       message: "주문이 완료되었습니다.",
