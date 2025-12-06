@@ -12,6 +12,8 @@ import productRoutes from "./routes/productRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 import cartRoutes from "./routes/cartRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
+import reviewRoutes from "./routes/reviewRoutes.js";
+import { requireLogin, requireAdmin } from "./middleware/authMiddleware.js";
 
 
 const app = express();
@@ -25,7 +27,7 @@ const PORT = process.env.PORT || 4000;
 const MONGO_URL = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/allbirdsDB";
 const SESSION_SECRET = process.env.SESSION_SECRET || "very-secret-key";
 const SESSION_TTL = Number(process.env.SESSION_TTL_MINUTES) || 30;
-const CORS_ORIGINS = process.env.CORS_ORIGINS?.split(",") || ["http://localhost:5173"];
+const CORS_ORIGINS = process.env.CORS_ORIGINS?.split(",") || ["http://localhost:5173", "http://localhost:5174"];
 
 // 미들웨어
 app.use(
@@ -64,8 +66,8 @@ app.use("/api/users", userRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/cart", cartRoutes);
-app.use("/api/orders", orderRoutes);
-app.use("/api/admin", adminRoutes);
+app.use("/api/admin", requireLogin, requireAdmin, adminRoutes);
+app.use("/api/reviews", reviewRoutes);
 
 // 에러 핸들러 (간단 버전)
 app.use((err, req, res, next) => {

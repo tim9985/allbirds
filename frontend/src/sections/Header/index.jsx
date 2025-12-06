@@ -5,12 +5,18 @@ import { MobileNavToggle } from "@/sections/Header/components/MobileNavToggle";
 import { HeaderActions } from "@/sections/Header/components/HeaderActions";
 
 const HeaderElement = styled.header`
-  position: sticky;
-  top: 0;
+  position: fixed;
+  top: 36px;
+  left: 0;
+  right: 0;
   background-color: white;
   width: 100%;
   z-index: 1049;
   height: 68px;
+  
+  @media (max-width: 767px) {
+    top: 28px;
+  }
 `;
 
 const HeaderInner = styled.div`

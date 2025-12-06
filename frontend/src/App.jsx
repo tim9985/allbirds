@@ -10,6 +10,10 @@ import { ProductDetail } from "@/pages/ProductDetail";
 import { Login } from "@/pages/Login";
 import { Register } from "@/pages/Register";
 import { MyPageLayout } from "@/pages/mypage/MyPageLayout";
+import { AdminDashboard } from "@/pages/admin/AdminDashboard";
+import { ProductManagement } from "@/pages/admin/ProductManagement";
+import { ProductRegistration } from "@/pages/admin/ProductRegistration";
+import { SalesReport } from "@/pages/admin/SalesReport";
 import { CartProvider } from "@/context/CartContext";
 import { AuthProvider } from "@/context/AuthContext";
 import styled from "styled-components";
@@ -29,6 +33,11 @@ const AppContainer = styled.div`
 
 const MainContent = styled.main`
   position: relative;
+  padding-top: 104px;
+  
+  @media (max-width: 767px) {
+    padding-top: 96px;
+  }
 `;
 
 const HiddenList = styled.ul`
@@ -54,6 +63,10 @@ export const App = () => {
                 <Route path="/account/login" element={<Login />} />
                 <Route path="/account/register" element={<Register />} />
                 <Route path="/mypage/*" element={<MyPageLayout />} />
+                <Route path="/admin" element={<AdminDashboard />} />
+                <Route path="/admin/products" element={<ProductManagement />} />
+                <Route path="/admin/products/new" element={<ProductRegistration />} />
+                <Route path="/admin/sales" element={<SalesReport />} />
               </Routes>
             </MainContent>
             <Footer />

@@ -1,6 +1,7 @@
 import styled from "styled-components";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
+import { useCart } from "@/context/CartContext";
 
 const ActionsWrapper = styled.div`
   box-sizing: border-box;
@@ -99,9 +100,26 @@ const UserName = styled.span`
   white-space: nowrap;
 `;
 
+const AdminButton = styled(Link)`
+  padding: 6px 12px;
+  background-color: #212121;
+  color: white;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-decoration: none;
+  margin-right: 0.5rem;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: #000;
+  }
+`;
+
 export const HeaderActions = () => {
   const navigate = useNavigate();
   const { isLoggedIn, user } = useAuth();
+  const { openCart } = useCart();
 
   const handleAccountClick = (event) => {
     event.preventDefault();
@@ -112,10 +130,18 @@ export const HeaderActions = () => {
     }
   };
 
+  const handleCartClick = (event) => {
+    event.preventDefault();
+    openCart();
+  };
+
   return (
     <ActionsWrapper>
       {isLoggedIn && user && (
         <UserName>{user.displayName || user.loginName}님</UserName>
+      )}
+      {isLoggedIn && user?.role === 'admin' && (
+        <AdminButton to="/admin">관리자</AdminButton>
       )}
       <ActionLink to="/search">
         <ActionIcon src="/img/icon-6.svg" alt="검색" />
@@ -124,7 +150,7 @@ export const HeaderActions = () => {
         <ActionIcon src="/img/icon-7.svg" alt={isLoggedIn ? "마이페이지" : "로그인"} />
         {isLoggedIn && <LoginIndicator />}
       </ActionLink>
-      <ActionLink to="#">
+      <ActionLink to="#" onClick={handleCartClick}>
         <CartIcon src="/img/icon-8.svg" alt="장바구니" />
         <CartBadge />
       </ActionLink>

@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { getMyOrders } from "@/api/userAPI";
+import { ReviewModal } from "@/components/ReviewModal";
+import { checkReviewExists } from "@/api/reviewAPI";
 
 const Wrapper = styled.div`
   background-color: #f2f2f2;
@@ -116,6 +118,11 @@ const ReviewButton = styled.button`
   &:hover {
     background-color: #3a6faf;
   }
+
+  &:disabled {
+    background-color: #999;
+    cursor: not-allowed;
+  }
 `;
 
 function formatDate(dateStr) {
@@ -130,6 +137,8 @@ function formatDate(dateStr) {
 
 export const MyOrders = () => {
   const [orders, setOrders] = useState([]);
+  const [reviewModal, setReviewModal] = useState(null);
+  const [reviewedItems, setReviewedItems] = useState(new Set());
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -141,6 +150,22 @@ export const MyOrders = () => {
         // 백엔드 응답: { orders: [...] }
         const list = res.orders ?? res.data?.orders ?? [];
         setOrders(list);
+
+        // 리뷰 작성 여부 확인
+        const reviewed = new Set();
+        for (const order of list) {
+          for (const item of order.items || []) {
+            try {
+              const { exists } = await checkReviewExists(item.productId, order._id);
+              if (exists) {
+                reviewed.add(`${order._id}-${item.productId}`);
+              }
+            } catch (e) {
+              console.error("리뷰 확인 오류:", e);
+            }
+          }
+        }
+        setReviewedItems(reviewed);
       } catch (e) {
         console.error("getMyOrders error:", e);
       }
@@ -149,13 +174,17 @@ export const MyOrders = () => {
     fetchOrders();
   }, []);
 
-  const handleReviewClick = (productId) => {
+  const handleReviewClick = (orderId, productId, productName) => {
     if (!productId) {
-      alert("상품 정보를 찾을 수 없어 후기 작성 페이지로 이동할 수 없습니다.");
+      alert("상품 정보를 찾을 수 없습니다.");
       return;
     }
-    // 상품 상세 페이지로 이동 → 거기서 리뷰 작성 가능하도록 연결
-    navigate(`/products/${productId}#review`);
+    setReviewModal({ orderId, productId, productName });
+  };
+
+  const handleReviewSuccess = () => {
+    // 리뷰 작성 성공 시 목록 새로고침
+    window.location.reload();
   };
 
   if (!orders.length) {
@@ -196,9 +225,10 @@ export const MyOrders = () => {
 
                   <ReviewButton
                     type="button"
-                    onClick={() => handleReviewClick(item.productId)}
+                    onClick={() => handleReviewClick(order._id, item.productId, item.productName)}
+                    disabled={reviewedItems.has(`${order._id}-${item.productId}`)}
                   >
-                    후기작성
+                    {reviewedItems.has(`${order._id}-${item.productId}`) ? "작성완료" : "후기작성"}
                   </ReviewButton>
                 </LeftCol>
 
@@ -211,6 +241,16 @@ export const MyOrders = () => {
           </OrderCard>
         ))}
       </List>
+
+      {reviewModal && (
+        <ReviewModal
+          productId={reviewModal.productId}
+          productName={reviewModal.productName}
+          orderId={reviewModal.orderId}
+          onClose={() => setReviewModal(null)}
+          onSuccess={handleReviewSuccess}
+        />
+      )}
     </Wrapper>
   );
 };

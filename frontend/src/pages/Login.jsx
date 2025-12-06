@@ -258,7 +258,13 @@ export const Login = () => {
     try {
       const response = await loginUser(formData.loginName, formData.password);
       login(response);  // AuthContext 업데이트
-      navigate("/");    // 메인페이지로 리다이렉트
+      
+      // 관리자 계정인 경우 관리자 페이지로, 아니면 메인페이지로 리다이렉트
+      if (response.user?.role === 'admin') {
+        navigate("/admin");
+      } else {
+        navigate("/");
+      }
     } catch (err) {
       const serverMsg = err.response?.data?.message || "로그인에 실패했습니다.";
       setError(serverMsg);
